@@ -13,7 +13,6 @@ func main() {
 	flag.Parse()
 
 	server := api.NewServer(*port)
-	//server.BindEndpoints()
 	if err := server.Run(); err != http.ErrServerClosed {
 		panic(err)
 	}

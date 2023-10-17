@@ -11,7 +11,7 @@ type Repository interface {
 	CartCreate(userID string) (CartDB, error)
 	CartUpdate(cartDB CartDB) (CartDB, error)
 	CartGet(cartID string) (CartDB, error)
-	OrderCreate(order OrderDB) (OrderDB, error)
+	OrderCreate(order OrderDB) OrderDB
 	OrderUpdate(order OrderDB) (OrderDB, error)
 	OrderGet(cartID string) (OrderDB, error)
 	ProductGet(ProductID string) (ProductDB, error)
@@ -27,6 +27,8 @@ type InMemoryRepository struct {
 var ErrRecordNotFound = errors.New("record not found")
 
 func (r *InMemoryRepository) CartCreate(userID string) (CartDB, error) {
+	r.lock.Lock()
+	defer r.lock.Unlock()
 	cartID := uuid.Must(uuid.NewRandom()).String()
 	cartDB := CartDB{UserID: userID, CartID: cartID}
 	r.cart[cartID] = cartDB
@@ -34,6 +36,8 @@ func (r *InMemoryRepository) CartCreate(userID string) (CartDB, error) {
 }
 
 func (r *InMemoryRepository) CartUpdate(cartDbUpdate CartDB) (CartDB, error) {
+	r.lock.Lock()
+	defer r.lock.Unlock()
 	if cartDB, found := r.cart[cartDbUpdate.CartID]; found {
 		r.cart[cartDB.CartID] = cartDbUpdate
 		return r.cart[cartDB.CartID], nil
@@ -48,8 +52,11 @@ func (r *InMemoryRepository) CartGet(cartID string) (CartDB, error) {
 	return CartDB{}, ErrRecordNotFound
 }
 
-func (r *InMemoryRepository) OrderCreate(o OrderDB) (OrderDB, error) {
-	return OrderDB{}, nil
+func (r *InMemoryRepository) OrderCreate(o OrderDB) OrderDB {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	r.order[o.CartID] = o
+	return r.order[o.CartID]
 }
 
 func (r *InMemoryRepository) OrderUpdate(o OrderDB) (OrderDB, error) {
@@ -69,6 +76,8 @@ func (r *InMemoryRepository) ProductGet(ProductID string) (ProductDB, error) {
 
 func NewRepository() Repository {
 	productTable := make(map[string]ProductDB)
-	productTable["45"] = ProductDB{ProductID: "45", Name: "producto-1", Category: "CAFE", Price: 10.0}
+	productTable["1"] = ProductDB{ProductID: "1", Name: "producto-1", Category: "Coffee", Price: 15.0}
+	productTable["2"] = ProductDB{ProductID: "1", Name: "producto-2", Category: "Equipment", Price: 22.0}
+	productTable["3"] = ProductDB{ProductID: "1", Name: "producto-3", Category: "Accessories", Price: 19.0}
 	return &InMemoryRepository{cart: make(map[string]CartDB), order: make(map[string]OrderDB), product: productTable, lock: sync.RWMutex{}}
 }

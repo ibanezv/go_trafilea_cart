@@ -27,6 +27,9 @@ func NewCartService(repo repository.Repository) CartService {
 
 func (c *CartService) Get(cartID string) (Cart, error) {
 	cartDb, err := c.repo.CartGet(cartID)
+	if errors.Is(err, repository.ErrRecordNotFound) {
+		return ConvertToCart(cartDb), ErrCartNotFound
+	}
 	return ConvertToCart(cartDb), err
 }
 
@@ -49,6 +52,9 @@ func (c *CartService) AddProduct(cartID string, productUpdate ProductUpdate) (Ca
 	} else {
 		productDB, err := c.repo.ProductGet(productUpdate.ProductID)
 		if err != nil {
+			if errors.Is(err, repository.ErrRecordNotFound) {
+				return Cart{}, ErrCartNotFound
+			}
 			return Cart{}, err
 		}
 		cart.Products = append(cart.Products, product.Product{ProductID: productDB.ProductID, Name: productDB.Name,
@@ -73,6 +79,9 @@ func (c *CartService) ModifyProduct(cartID string, productUpdate ProductUpdate) 
 		cart.Products[index].Quantity += productUpdate.Quantity
 		cartDb, err := c.repo.CartUpdate(convertToDBCart(cart))
 		if err != nil {
+			if errors.Is(err, repository.ErrRecordNotFound) {
+				return Cart{}, ErrCartNotFound
+			}
 			return Cart{}, err
 		}
 		return ConvertToCart(cartDb), nil

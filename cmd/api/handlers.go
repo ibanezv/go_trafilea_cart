@@ -15,7 +15,7 @@ func PostCart(cartService cart.Carts) http.HandlerFunc {
 		defer r.Body.Close()
 		err := json.NewDecoder(r.Body).Decode(&cartRequest)
 		if err != nil {
-			w.Header().Add("Statuscode", "500")
+			w.Header().Add("Statuscode", "400")
 			return
 		}
 

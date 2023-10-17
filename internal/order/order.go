@@ -1,6 +1,8 @@
 package order
 
 import (
+	"errors"
+
 	"github.com/ibanezv/go_trafilea_cart/internal/cart"
 	"github.com/ibanezv/go_trafilea_cart/internal/repository"
 )
@@ -16,12 +18,6 @@ type OrdersService struct {
 	repo repository.Repository
 }
 
-type DiscountsConfig struct {
-	categoryPromo bool
-	shippingPromo bool
-	DiscountPromo bool
-}
-
 func NewOrdersService(repo repository.Repository) OrdersService {
 	return OrdersService{repo: repo}
 }
@@ -33,21 +29,30 @@ func (o *OrdersService) Get(cartID string) (Order, error) {
 func (o *OrdersService) Create(cartID string) (Order, error) {
 	cartDB, err := o.repo.CartGet(cartID)
 	if err != nil {
-		//TODO: return error record not found
+		if errors.Is(err, repository.ErrRecordNotFound) {
+			return Order{}, cart.ErrCartNotFound
+		}
 		return Order{}, err
 	}
+
 	order := createOrder(cart.ConvertToCart(cartDB))
-	return order, nil
+	orderDB := o.repo.OrderCreate(convertToOrderDB(order))
+
+	return convertToOrder(orderDB), nil
 }
 
 func createOrder(cart cart.Cart) Order {
-	promoConfig := DiscountsConfig{categoryPromo: validatePromoByCategory("", cart),
-		shippingPromo: validatePromoShipping("", cart), DiscountPromo: validateDiscounts("", cart)}
-	shippingPrice, discPercentage, ammountDiscount := applyPromos(promoConfig, &cart)
+	promoConfig := DiscountsConfig{categoryPromo: validatePromoByCategory(COFFEE, cart),
+		shippingPromo: validatePromoShipping(EQUIPMENT, cart), DiscountPromo: validateDiscounts(ACCESORIES, cart)}
+
+	shippingPrice, discountPercentage, ammountDiscount := applyPromos(promoConfig, &cart)
+
 	countTotalProducts := countTotalProducts(cart)
 	ammountTotal := amountTotalPrice(cart)
-	order := Order{CartID: cart.CartID, Totals: OrderDetail{Products: countTotalProducts, Discounts: discPercentage, Shipping: shippingPrice,
-		TotalOrderPrice: ((ammountTotal - (ammountTotal * float32(discPercentage))) + ammountDiscount) + float32(shippingPrice)}}
+
+	order := Order{CartID: cart.CartID, Totals: OrderDetail{Products: countTotalProducts, Discounts: discountPercentage, Shipping: shippingPrice,
+		TotalOrderPrice: ((ammountTotal - (ammountTotal * float32(discountPercentage))) + ammountDiscount) + float32(shippingPrice)}}
+
 	return order
 }
 
@@ -58,7 +63,7 @@ func applyPromos(config DiscountsConfig, cart *cart.Cart) (int32, int32, float32
 
 	if config.categoryPromo {
 		for _, p := range cart.Products {
-			if p.Category == "COFFEE" {
+			if p.Category == COFFEE {
 				p.Quantity++
 				ammountDiscount = (-1) * p.Price
 				break
@@ -122,4 +127,14 @@ func amountTotalPrice(cart cart.Cart) float32 {
 		amount += (float32(product.Quantity) * product.Price)
 	}
 	return amount
+}
+
+func convertToOrderDB(order Order) repository.OrderDB {
+	return repository.OrderDB{CartID: order.CartID, Totals: repository.OrderDetailDB{Products: order.Totals.Products,
+		Discounts: order.Totals.Discounts, Shipping: order.Totals.Shipping, TotalOrderPrice: order.Totals.TotalOrderPrice}}
+}
+
+func convertToOrder(order repository.OrderDB) Order {
+	return Order{CartID: order.CartID, Totals: OrderDetail{Products: order.Totals.Products, Shipping: order.Totals.Shipping,
+		Discounts: order.Totals.Discounts, TotalOrderPrice: order.Totals.TotalOrderPrice}}
 }
