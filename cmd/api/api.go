@@ -34,6 +34,6 @@ type orderResponse struct {
 type OrderDetailResponse struct {
 	Products        int32   `json:"products"`
 	Discounts       int32   `json:"discounts"`
-	Shipping        int32   `json:"shipping"`
+	Shipping        float32 `json:"shipping"`
 	TotalOrderPrice float32 `json:"total_order_price"`
 }

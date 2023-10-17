@@ -9,7 +9,7 @@ type CartDB struct {
 type OrderDetailDB struct {
 	Products        int32
 	Discounts       int32
-	Shipping        int32
+	Shipping        float32
 	TotalOrderPrice float32
 }
 
