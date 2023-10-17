@@ -64,7 +64,10 @@ func (r *InMemoryRepository) OrderUpdate(o OrderDB) (OrderDB, error) {
 }
 
 func (r *InMemoryRepository) OrderGet(cartID string) (OrderDB, error) {
-	return OrderDB{}, nil
+	if orderDB, found := r.order[cartID]; found {
+		return orderDB, nil
+	}
+	return OrderDB{}, ErrRecordNotFound
 }
 
 func (r *InMemoryRepository) ProductGet(ProductID string) (ProductDB, error) {
@@ -77,7 +80,7 @@ func (r *InMemoryRepository) ProductGet(ProductID string) (ProductDB, error) {
 func NewRepository() Repository {
 	productTable := make(map[string]ProductDB)
 	productTable["1"] = ProductDB{ProductID: "1", Name: "producto-1", Category: "Coffee", Price: 15.0}
-	productTable["2"] = ProductDB{ProductID: "1", Name: "producto-2", Category: "Equipment", Price: 22.0}
-	productTable["3"] = ProductDB{ProductID: "1", Name: "producto-3", Category: "Accessories", Price: 19.0}
+	productTable["2"] = ProductDB{ProductID: "2", Name: "producto-2", Category: "Equipment", Price: 22.0}
+	productTable["3"] = ProductDB{ProductID: "3", Name: "producto-3", Category: "Accessories", Price: 19.0}
 	return &InMemoryRepository{cart: make(map[string]CartDB), order: make(map[string]OrderDB), product: productTable, lock: sync.RWMutex{}}
 }

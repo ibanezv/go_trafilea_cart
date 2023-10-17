@@ -7,6 +7,8 @@ import (
 	"github.com/ibanezv/go_trafilea_cart/internal/repository"
 )
 
+var ErrOrderNotFound = errors.New("order not found")
+
 type Orders interface {
 	Create(string) (Order, error)
 	Get(string) (Order, error)
@@ -21,7 +23,11 @@ func NewOrdersService(repo repository.Repository) OrdersService {
 }
 
 func (o *OrdersService) Get(cartID string) (Order, error) {
-	return Order{}, nil
+	orderDB, err := o.repo.OrderGet(cartID)
+	if err != nil {
+		return Order{}, ErrOrderNotFound
+	}
+	return convertToOrder(orderDB), nil
 }
 
 func (o *OrdersService) Create(cartID string) (Order, error) {

@@ -7,8 +7,8 @@ import (
 	"github.com/ibanezv/go_trafilea_cart/internal/repository"
 )
 
-var ErrProductNotFound = errors.New("record not found")
-var ErrCartNotFound = errors.New("record not found")
+var ErrProductNotFound = errors.New("product not found")
+var ErrCartNotFound = errors.New("cart not found")
 
 type Carts interface {
 	Get(string) (Cart, error)
@@ -41,6 +41,9 @@ func (c *CartService) Create(userID string) (Cart, error) {
 func (c *CartService) AddProduct(cartID string, productUpdate ProductUpdate) (Cart, error) {
 	cartDb, err := c.repo.CartGet(cartID)
 	if err != nil {
+		if errors.Is(err, repository.ErrRecordNotFound) {
+			return Cart{}, ErrCartNotFound
+		}
 		return Cart{}, err
 	}
 
@@ -48,7 +51,6 @@ func (c *CartService) AddProduct(cartID string, productUpdate ProductUpdate) (Ca
 	index := findIndexOfProduct(cart.Products, cartID)
 	if index >= 0 {
 		cart.Products[index].Quantity += productUpdate.Quantity
-		return cart, nil
 	} else {
 		productDB, err := c.repo.ProductGet(productUpdate.ProductID)
 		if err != nil {
@@ -58,23 +60,27 @@ func (c *CartService) AddProduct(cartID string, productUpdate ProductUpdate) (Ca
 			return Cart{}, err
 		}
 		cart.Products = append(cart.Products, product.Product{ProductID: productDB.ProductID, Name: productDB.Name,
-			Category: productDB.Category, Quantity: productUpdate.Quantity})
-		cartDb, err := c.repo.CartUpdate(convertToDBCart(cart))
-		if err != nil {
-			return Cart{}, err
-		}
-		return ConvertToCart(cartDb), nil
+			Category: productDB.Category, Price: productDB.Price, Quantity: productUpdate.Quantity})
 	}
+
+	cartDb, err = c.repo.CartUpdate(convertToDBCart(cart))
+	if err != nil {
+		return Cart{}, err
+	}
+	return ConvertToCart(cartDb), nil
 }
 
 func (c *CartService) ModifyProduct(cartID string, productUpdate ProductUpdate) (Cart, error) {
 	cartDb, err := c.repo.CartGet(cartID)
 	if err != nil {
+		if errors.Is(err, repository.ErrRecordNotFound) {
+			return Cart{}, ErrCartNotFound
+		}
 		return Cart{}, err
 	}
 
 	cart := ConvertToCart(cartDb)
-	index := findIndexOfProduct(cart.Products, cartID)
+	index := findIndexOfProduct(cart.Products, productUpdate.ProductID)
 	if index >= 0 {
 		cart.Products[index].Quantity += productUpdate.Quantity
 		cartDb, err := c.repo.CartUpdate(convertToDBCart(cart))
@@ -86,7 +92,7 @@ func (c *CartService) ModifyProduct(cartID string, productUpdate ProductUpdate) 
 		}
 		return ConvertToCart(cartDb), nil
 	} else {
-		return Cart{}, ErrCartNotFound
+		return Cart{}, ErrProductNotFound
 	}
 }
 
@@ -104,7 +110,7 @@ func findIndexOfProduct(products []product.Product, productID string) int {
 func ConvertToCart(c repository.CartDB) Cart {
 	cart := Cart{CartID: c.CartID, UserID: c.UserID}
 	for _, c := range c.Products {
-		p := product.Product{ProductID: c.ProductID, Category: c.Category, Name: c.Name, Price: c.Price}
+		p := product.Product{ProductID: c.ProductID, Category: c.Category, Name: c.Name, Price: c.Price, Quantity: c.Quantity}
 		cart.Products = append(cart.Products, p)
 	}
 	return cart

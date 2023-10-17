@@ -5,7 +5,7 @@ import "github.com/ibanezv/go_trafilea_cart/internal/cart"
 const defaultShippingPrice = float32(100)
 
 type OrderProcess struct {
-	cart               cart.Cart
+	cart               *cart.Cart
 	order              Order
 	config             DiscountsConfig
 	shippingPrice      float32
@@ -14,13 +14,13 @@ type OrderProcess struct {
 }
 
 func (o *OrderProcess) New(cart cart.Cart) OrderBuilder {
-	o.cart = cart
+	o.cart = &cart
 	return o
 }
 
 func (o *OrderProcess) SetConfig() OrderBuilder {
-	o.config = DiscountsConfig{categoryPromo: validatePromoByCategory(COFFEE, o.cart),
-		shippingPromo: validatePromoShipping(EQUIPMENT, o.cart), DiscountPromo: validateDiscounts(ACCESORIES, o.cart)}
+	o.config = DiscountsConfig{categoryPromo: validatePromoByCategory(COFFEE, *o.cart),
+		shippingPromo: validatePromoShipping(EQUIPMENT, *o.cart), DiscountPromo: validateDiscounts(ACCESORIES, *o.cart)}
 	return o
 }
 
@@ -30,7 +30,7 @@ func (o *OrderProcess) ApplyDiscounts() OrderBuilder {
 	if o.config.categoryPromo {
 		for _, p := range o.cart.Products {
 			if p.Category == COFFEE {
-				p.Quantity++
+				p.Quantity += 1
 				o.ammountDiscount = (-1) * p.Price
 				break
 			}
@@ -69,7 +69,7 @@ func validateDiscounts(category string, cart cart.Cart) bool {
 	return amountByCategory(category, cart) > 70
 }
 
-func countTotalProducts(cart cart.Cart) int32 {
+func countTotalProducts(cart *cart.Cart) int32 {
 	q := int32(0)
 	for _, product := range cart.Products {
 		q += product.Quantity
@@ -77,7 +77,7 @@ func countTotalProducts(cart cart.Cart) int32 {
 	return q
 }
 
-func amountTotalPrice(cart cart.Cart) float32 {
+func amountTotalPrice(cart *cart.Cart) float32 {
 	amount := float32(0)
 	for _, product := range cart.Products {
 		amount += (float32(product.Quantity) * product.Price)
