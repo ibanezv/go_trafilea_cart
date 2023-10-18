@@ -57,10 +57,10 @@ func (app *CartApp) Run() error {
 } */
 
 func (app *CartApp) routeMapper() {
-	app.serveMux.HandleFunc("/cart/{cartId}", GetCart(app.cartService)).Methods(http.MethodGet)
-	app.serveMux.HandleFunc("/cart", PostCart(app.cartService)).Methods(http.MethodPost)
-	app.serveMux.HandleFunc("/cart/{cartId}/product/{productId}", PutProductCart(app.cartService)).Methods(http.MethodPut)
-	app.serveMux.HandleFunc("/cart/{cartId}", PutCart(app.cartService)).Methods(http.MethodPut)
-	app.serveMux.HandleFunc("/order", PostOrder(app.orderService)).Methods(http.MethodPost)
-	app.serveMux.HandleFunc("/order/{cartId}", GetOrder(app.orderService)).Methods(http.MethodGet)
+	app.serveMux.HandleFunc("/v1/cart/{cartId}", GetCart(app.cartService)).Methods(http.MethodGet)
+	app.serveMux.HandleFunc("/v1/cart", PostCart(app.cartService)).Methods(http.MethodPost)
+	app.serveMux.HandleFunc("/v1/cart/{cartId}/product/{productId}", PutProductCart(app.cartService)).Methods(http.MethodPut)
+	app.serveMux.HandleFunc("/v1/cart/{cartId}", PutCart(app.cartService)).Methods(http.MethodPut)
+	app.serveMux.HandleFunc("/v1/order", PostOrder(app.orderService)).Methods(http.MethodPost)
+	app.serveMux.HandleFunc("/v1/order/{cartId}", GetOrder(app.orderService)).Methods(http.MethodGet)
 }

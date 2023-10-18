@@ -54,7 +54,7 @@ func (o *OrderProcess) Build() *Order {
 
 	o.order = Order{CartID: o.cart.CartID, Totals: OrderDetail{Products: countTotalProducts + o.ammountProductsGift,
 		Discounts: o.discountPercentage, Shipping: o.shippingPrice,
-		TotalOrderPrice: ((ammountTotal - (ammountTotal * float32(o.discountPercentage))) + o.ammountDiscount) + o.shippingPrice}}
+		TotalOrderPrice: ((ammountTotal - (ammountTotal * (float32(o.discountPercentage) / 100))) + o.ammountDiscount) + o.shippingPrice}}
 
 	return &o.order
 }
@@ -101,7 +101,7 @@ func amountByCategory(category string, cart cart.Cart) float32 {
 	q := float32(0)
 	for _, product := range cart.Products {
 		if product.Category == category {
-			q += product.Price
+			q += product.Price * float32(product.Quantity)
 		}
 	}
 	return q

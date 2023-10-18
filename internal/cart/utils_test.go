@@ -26,7 +26,7 @@ func (r *repositoryMock) CartUpdate(cartDB repository.CartDB) (repository.CartDB
 
 func (r *repositoryMock) CartGet(cartID string) (repository.CartDB, error) {
 	if cartID == testCartID {
-		c := repository.CartDB{UserID: testUserID, CartID: testCartID}
+		c := repository.CartDB{UserID: testUserID, CartID: cartID}
 		c.Products = append(c.Products, testProductCartDB)
 		return c, nil
 	}
