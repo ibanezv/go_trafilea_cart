@@ -48,7 +48,7 @@ func (c *CartService) AddProduct(cartID string, productUpdate ProductUpdate) (Ca
 	}
 
 	cart := ConvertToCart(cartDb)
-	index := findIndexOfProduct(cart.Products, cartID)
+	index := findIndexOfProduct(cart.Products, productUpdate.ProductID)
 	if index >= 0 {
 		cart.Products[index].Quantity += productUpdate.Quantity
 	} else {
@@ -82,7 +82,7 @@ func (c *CartService) ModifyProduct(cartID string, productUpdate ProductUpdate) 
 	cart := ConvertToCart(cartDb)
 	index := findIndexOfProduct(cart.Products, productUpdate.ProductID)
 	if index >= 0 {
-		cart.Products[index].Quantity += productUpdate.Quantity
+		cart.Products[index].Quantity = productUpdate.Quantity
 		cartDb, err := c.repo.CartUpdate(convertToDBCart(cart))
 		if err != nil {
 			if errors.Is(err, repository.ErrRecordNotFound) {
