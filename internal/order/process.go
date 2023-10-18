@@ -5,12 +5,13 @@ import "github.com/ibanezv/go_trafilea_cart/internal/cart"
 const defaultShippingPrice = float32(100)
 
 type OrderProcess struct {
-	cart               *cart.Cart
-	order              Order
-	config             DiscountsConfig
-	shippingPrice      float32
-	discountPercentage int32
-	ammountDiscount    float32
+	cart                *cart.Cart
+	order               Order
+	config              DiscountsConfig
+	shippingPrice       float32
+	discountPercentage  int32
+	ammountDiscount     float32
+	ammountProductsGift int32
 }
 
 func (o *OrderProcess) New(cart cart.Cart) OrderBuilder {
@@ -30,7 +31,7 @@ func (o *OrderProcess) ApplyDiscounts() OrderBuilder {
 	if o.config.categoryPromo {
 		for _, p := range o.cart.Products {
 			if p.Category == COFFEE {
-				p.Quantity += 1
+				o.ammountProductsGift = 1
 				o.ammountDiscount = (-1) * p.Price
 				break
 			}
@@ -51,7 +52,8 @@ func (o *OrderProcess) Build() *Order {
 	countTotalProducts := countTotalProducts(o.cart)
 	ammountTotal := amountTotalPrice(o.cart)
 
-	o.order = Order{CartID: o.cart.CartID, Totals: OrderDetail{Products: countTotalProducts, Discounts: o.discountPercentage, Shipping: o.shippingPrice,
+	o.order = Order{CartID: o.cart.CartID, Totals: OrderDetail{Products: countTotalProducts + o.ammountProductsGift,
+		Discounts: o.discountPercentage, Shipping: o.shippingPrice,
 		TotalOrderPrice: ((ammountTotal - (ammountTotal * float32(o.discountPercentage))) + o.ammountDiscount) + o.shippingPrice}}
 
 	return &o.order

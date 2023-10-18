@@ -20,6 +20,11 @@ func PostCart(cartService cart.Carts) http.HandlerFunc {
 			return
 		}
 
+		if !cartRequest.validate() {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
 		cart, err := cartService.Create(cartRequest.UserID)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -76,7 +81,12 @@ func PutCart(cartService cart.Carts) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+
 		productUpdate := cart.ProductUpdate{ProductID: productRequest.ProductID, Quantity: productRequest.Quantity}
+		if !productRequest.validate() {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 
 		c, err := cartService.AddProduct(cartID, productUpdate)
 		if err != nil {
@@ -112,7 +122,12 @@ func PutProductCart(cartService cart.Carts) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+
 		productUpdate := cart.ProductUpdate{ProductID: productID, Quantity: productRequest.Quantity}
+		if !productRequest.validate() {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 
 		c, err := cartService.ModifyProduct(cartID, productUpdate)
 		if err != nil {
@@ -137,6 +152,11 @@ func PostOrder(orderService order.Orders) http.HandlerFunc {
 		defer r.Body.Close()
 		err := json.NewDecoder(r.Body).Decode(&orderReq)
 		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		if !orderReq.validate() {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}

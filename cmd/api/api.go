@@ -1,5 +1,9 @@
 package api
 
+type requestObject interface {
+	validate() bool
+}
+
 type cartRequest struct {
 	UserID string
 }
@@ -37,4 +41,16 @@ type OrderDetailResponse struct {
 	Discounts       int32   `json:"discounts"`
 	Shipping        float32 `json:"shipping"`
 	TotalOrderPrice float32 `json:"total_order_price"`
+}
+
+func (r productsUpdateRequest) validate() bool {
+	return (r.ProductID != "" && r.Quantity >= 0)
+}
+
+func (r orderRequest) validate() bool {
+	return r.CartID != ""
+}
+
+func (r cartRequest) validate() bool {
+	return r.UserID != ""
 }
