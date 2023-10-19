@@ -1,6 +1,7 @@
 package order
 
 import (
+	"context"
 	"testing"
 
 	"github.com/ibanezv/go_trafilea_cart/internal/cart"
@@ -30,7 +31,7 @@ func TestProcessOrder(t *testing.T) {
 			// given
 			repo := repositoryMock{}
 			cartService := cart.NewCartService(&repo)
-			c, _ := cartService.Get(testCartIDWithoutDiscount)
+			c, _ := cartService.Get(context.Background(), testCartIDWithoutDiscount)
 			orderProcess := OrderProcess{}
 
 			// when

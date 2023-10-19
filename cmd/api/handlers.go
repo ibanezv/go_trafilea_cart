@@ -12,6 +12,7 @@ import (
 
 func PostCart(cartService cart.Carts) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		cartRequest := cartRequest{}
 		defer r.Body.Close()
 		err := json.NewDecoder(r.Body).Decode(&cartRequest)
@@ -25,7 +26,7 @@ func PostCart(cartService cart.Carts) http.HandlerFunc {
 			return
 		}
 
-		cart, err := cartService.Create(cartRequest.UserID)
+		cart, err := cartService.Create(ctx, cartRequest.UserID)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -48,7 +49,8 @@ func GetCart(cartService cart.Carts) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		cartID := vars["cartId"]
-		c, err := cartService.Get(cartID)
+		ctx := r.Context()
+		c, err := cartService.Get(ctx, cartID)
 		w.Header().Add("content-type", "application/json")
 		if err != nil {
 			if errors.Is(err, cart.ErrCartNotFound) {
@@ -74,6 +76,7 @@ func PutCart(cartService cart.Carts) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		cartID := vars["cartId"]
+		ctx := r.Context()
 
 		productRequest := productsUpdateRequest{}
 		err := json.NewDecoder(r.Body).Decode(&productRequest)
@@ -88,7 +91,7 @@ func PutCart(cartService cart.Carts) http.HandlerFunc {
 			return
 		}
 
-		c, err := cartService.AddProduct(cartID, productUpdate)
+		c, err := cartService.AddProduct(ctx, cartID, productUpdate)
 		if err != nil {
 			if errors.Is(err, cart.ErrCartNotFound) {
 				w.WriteHeader(http.StatusNotFound)
@@ -115,6 +118,7 @@ func PutProductCart(cartService cart.Carts) http.HandlerFunc {
 		vars := mux.Vars(r)
 		cartID := vars["cartId"]
 		productID := vars["productId"]
+		ctx := r.Context()
 		productRequest := productsUpdateRequest{}
 		defer r.Body.Close()
 		err := json.NewDecoder(r.Body).Decode(&productRequest)
@@ -130,7 +134,7 @@ func PutProductCart(cartService cart.Carts) http.HandlerFunc {
 		}
 
 		productUpdate := cart.ProductUpdate{ProductID: productRequest.ProductID, Quantity: productRequest.Quantity}
-		c, err := cartService.ModifyProduct(cartID, productUpdate)
+		c, err := cartService.ModifyProduct(ctx, cartID, productUpdate)
 		if err != nil {
 			if errors.Is(err, cart.ErrCartNotFound) || errors.Is(err, cart.ErrProductNotFound) {
 				w.WriteHeader(http.StatusNotFound)
@@ -143,12 +147,13 @@ func PutProductCart(cartService cart.Carts) http.HandlerFunc {
 		body, _ := json.Marshal(convertToCartResponse(c))
 		w.Header().Add("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write(body)
+		_, _ = w.Write(body)
 	}
 }
 
 func PostOrder(orderService order.Orders) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		orderReq := orderRequest{}
 		defer r.Body.Close()
 		err := json.NewDecoder(r.Body).Decode(&orderReq)
@@ -162,7 +167,7 @@ func PostOrder(orderService order.Orders) http.HandlerFunc {
 			return
 		}
 
-		order, err := orderService.Create(orderReq.CartID)
+		order, err := orderService.Create(ctx, orderReq.CartID)
 		if err != nil {
 			if errors.Is(err, cart.ErrCartNotFound) {
 				w.WriteHeader(http.StatusNotFound)
@@ -179,12 +184,13 @@ func PostOrder(orderService order.Orders) http.HandlerFunc {
 		}
 		w.Header().Add("content-type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		w.Write(body)
+		_, _ = w.Write(body)
 	}
 }
 
 func GetOrder(orderService order.Orders) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
 		vars := mux.Vars(r)
 		cartID := vars["cartId"]
 		if cartID == "" {
@@ -192,7 +198,7 @@ func GetOrder(orderService order.Orders) http.HandlerFunc {
 			return
 		}
 
-		o, err := orderService.Get(cartID)
+		o, err := orderService.Get(ctx, cartID)
 		if err != nil {
 			if errors.Is(err, order.ErrOrderNotFound) {
 				w.WriteHeader(http.StatusNotFound)
@@ -209,7 +215,7 @@ func GetOrder(orderService order.Orders) http.HandlerFunc {
 		}
 		w.Header().Add("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write(body)
+		_, _ = w.Write(body)
 	}
 }
 

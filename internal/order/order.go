@@ -1,7 +1,9 @@
 package order
 
 import (
+	"context"
 	"errors"
+	"log"
 
 	"github.com/ibanezv/go_trafilea_cart/internal/cart"
 	"github.com/ibanezv/go_trafilea_cart/internal/repository"
@@ -10,8 +12,8 @@ import (
 var ErrOrderNotFound = errors.New("order not found")
 
 type Orders interface {
-	Create(string) (Order, error)
-	Get(string) (Order, error)
+	Create(context.Context, string) (Order, error)
+	Get(context.Context, string) (Order, error)
 }
 
 type OrdersService struct {
@@ -22,18 +24,20 @@ func NewOrdersService(repo repository.Repository) OrdersService {
 	return OrdersService{repo: repo}
 }
 
-func (o *OrdersService) Get(cartID string) (Order, error) {
+func (o *OrdersService) Get(ctx context.Context, cartID string) (Order, error) {
 	orderDB, err := o.repo.OrderGet(cartID)
 	if err != nil {
+		log.Printf("cart %s not found:%v", cartID, err)
 		return Order{}, ErrOrderNotFound
 	}
 	return convertToOrder(orderDB), nil
 }
 
-func (o *OrdersService) Create(cartID string) (Order, error) {
+func (o *OrdersService) Create(ctx context.Context, cartID string) (Order, error) {
 	cartDB, err := o.repo.CartGet(cartID)
 	if err != nil {
 		if errors.Is(err, repository.ErrRecordNotFound) {
+			log.Printf("cart %s not found:%v", cartID, err)
 			return Order{}, cart.ErrCartNotFound
 		}
 		return Order{}, err

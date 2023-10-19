@@ -1,6 +1,7 @@
 package order
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -42,7 +43,7 @@ func TestOrders(t *testing.T) {
 			orderServ := NewOrdersService(&repo)
 
 			// when
-			order, err := orderServ.Create(tt.cartID)
+			order, err := orderServ.Create(context.Background(), tt.cartID)
 
 			// then
 			assert.Equal(t, tt.expectedError, err != nil)

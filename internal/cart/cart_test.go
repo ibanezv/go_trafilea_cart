@@ -1,6 +1,7 @@
 package cart
 
 import (
+	"context"
 	"testing"
 
 	"github.com/ibanezv/go_trafilea_cart/internal/product"
@@ -25,7 +26,7 @@ func TestCartCreate(t *testing.T) {
 			cartServ := NewCartService(&repo)
 
 			// when
-			cart, err := cartServ.Create(testUserID)
+			cart, err := cartServ.Create(context.Background(), testUserID)
 
 			// then
 			assert.NoError(t, err)
@@ -66,7 +67,7 @@ func TestCartAddProduct(t *testing.T) {
 			cartServ := NewCartService(&repo)
 
 			// when
-			cart, err := cartServ.AddProduct(tt.CartID, tt.productUpdate)
+			cart, err := cartServ.AddProduct(context.Background(), tt.CartID, tt.productUpdate)
 
 			// then
 			assert.Equal(t, tt.expectedError, err != nil)
@@ -109,7 +110,7 @@ func TestCartModifyProduct(t *testing.T) {
 			cartServ := NewCartService(&repo)
 
 			// when
-			cart, err := cartServ.ModifyProduct(tt.CartID, tt.productUpdate)
+			cart, err := cartServ.ModifyProduct(context.Background(), tt.CartID, tt.productUpdate)
 
 			// then
 			assert.Equal(t, tt.expectedError, err != nil)

@@ -1,20 +1,22 @@
 package cart
 
 import (
+	"context"
 	"errors"
 
 	"github.com/ibanezv/go_trafilea_cart/internal/product"
 	"github.com/ibanezv/go_trafilea_cart/internal/repository"
+	"github.com/rs/zerolog/log"
 )
 
 var ErrProductNotFound = errors.New("product not found")
 var ErrCartNotFound = errors.New("cart not found")
 
 type Carts interface {
-	Get(string) (Cart, error)
-	Create(string) (Cart, error)
-	AddProduct(string, ProductUpdate) (Cart, error)
-	ModifyProduct(string, ProductUpdate) (Cart, error)
+	Get(context.Context, string) (Cart, error)
+	Create(context.Context, string) (Cart, error)
+	AddProduct(context.Context, string, ProductUpdate) (Cart, error)
+	ModifyProduct(context.Context, string, ProductUpdate) (Cart, error)
 }
 
 type CartService struct {
@@ -25,23 +27,25 @@ func NewCartService(repo repository.Repository) CartService {
 	return CartService{repo: repo}
 }
 
-func (c *CartService) Get(cartID string) (Cart, error) {
+func (c *CartService) Get(ctx context.Context, cartID string) (Cart, error) {
 	cartDb, err := c.repo.CartGet(cartID)
 	if errors.Is(err, repository.ErrRecordNotFound) {
+		log.Printf("cart %s not found:%v", cartID, err)
 		return ConvertToCart(cartDb), ErrCartNotFound
 	}
 	return ConvertToCart(cartDb), err
 }
 
-func (c *CartService) Create(userID string) (Cart, error) {
+func (c *CartService) Create(ctx context.Context, userID string) (Cart, error) {
 	cartDb, err := c.repo.CartCreate(userID)
 	return ConvertToCart(cartDb), err
 }
 
-func (c *CartService) AddProduct(cartID string, productUpdate ProductUpdate) (Cart, error) {
+func (c *CartService) AddProduct(ctx context.Context, cartID string, productUpdate ProductUpdate) (Cart, error) {
 	cartDb, err := c.repo.CartGet(cartID)
 	if err != nil {
 		if errors.Is(err, repository.ErrRecordNotFound) {
+			log.Printf("cart %s not found:%v", cartID, err)
 			return Cart{}, ErrCartNotFound
 		}
 		return Cart{}, err
@@ -55,7 +59,8 @@ func (c *CartService) AddProduct(cartID string, productUpdate ProductUpdate) (Ca
 		productDB, err := c.repo.ProductGet(productUpdate.ProductID)
 		if err != nil {
 			if errors.Is(err, repository.ErrRecordNotFound) {
-				return Cart{}, ErrCartNotFound
+				log.Printf("product %s not found:%v", productUpdate.ProductID, err)
+				return Cart{}, ErrProductNotFound
 			}
 			return Cart{}, err
 		}
@@ -70,10 +75,11 @@ func (c *CartService) AddProduct(cartID string, productUpdate ProductUpdate) (Ca
 	return ConvertToCart(cartDb), nil
 }
 
-func (c *CartService) ModifyProduct(cartID string, productUpdate ProductUpdate) (Cart, error) {
+func (c *CartService) ModifyProduct(ctx context.Context, cartID string, productUpdate ProductUpdate) (Cart, error) {
 	cartDb, err := c.repo.CartGet(cartID)
 	if err != nil {
 		if errors.Is(err, repository.ErrRecordNotFound) {
+			log.Printf("cart %s not found:%v", cartID, err)
 			return Cart{}, ErrCartNotFound
 		}
 		return Cart{}, err
@@ -86,6 +92,7 @@ func (c *CartService) ModifyProduct(cartID string, productUpdate ProductUpdate) 
 		cartDb, err := c.repo.CartUpdate(convertToDBCart(cart))
 		if err != nil {
 			if errors.Is(err, repository.ErrRecordNotFound) {
+				log.Printf("cart %s not found:%v", cartID, err)
 				return Cart{}, ErrCartNotFound
 			}
 			return Cart{}, err
