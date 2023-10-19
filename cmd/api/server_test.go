@@ -20,7 +20,7 @@ func TestCartCreationAndUpdate(t *testing.T) {
 		UserID: "123",
 	})
 	require.NoError(t, err)
-	request, err := http.NewRequest(http.MethodPost, "/v1/cart", bytes.NewReader(content))
+	request, err := http.NewRequest(http.MethodPost, "/api/v1/cart", bytes.NewReader(content))
 	require.NoError(t, err)
 	recorder := httptest.NewRecorder()
 
@@ -35,7 +35,7 @@ func TestCartCreationAndUpdate(t *testing.T) {
 	assert.Equal(t, "123", cartResp.UseID)
 
 	// and given
-	request, err = http.NewRequest(http.MethodGet, fmt.Sprintf("/v1/cart/%s", cartResp.CartID), bytes.NewReader(content))
+	request, err = http.NewRequest(http.MethodGet, fmt.Sprintf("/api/v1/cart/%s", cartResp.CartID), bytes.NewReader(content))
 	require.NoError(t, err)
 	recorder = httptest.NewRecorder()
 
@@ -57,7 +57,7 @@ func TestCartCreationAndUpdate(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	request, err = http.NewRequest(http.MethodPut, fmt.Sprintf("/v1/cart/%s", cartResp.CartID), bytes.NewReader(content))
+	request, err = http.NewRequest(http.MethodPut, fmt.Sprintf("/api/v1/cart/%s", cartResp.CartID), bytes.NewReader(content))
 	require.NoError(t, err)
 	recorder = httptest.NewRecorder()
 
@@ -79,7 +79,7 @@ func TestCartCreationAndUpdate(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	request, err = http.NewRequest(http.MethodPut, fmt.Sprintf("/v1/cart/%s/product/1", cartResp.CartID), bytes.NewReader(content))
+	request, err = http.NewRequest(http.MethodPut, fmt.Sprintf("/api/v1/cart/%s/product/1", cartResp.CartID), bytes.NewReader(content))
 	require.NoError(t, err)
 	recorder = httptest.NewRecorder()
 

@@ -1,9 +1,5 @@
 package api
 
-type requestObject interface {
-	validate() bool
-}
-
 type cartRequest struct {
 	UserID string
 }

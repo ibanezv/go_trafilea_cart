@@ -40,7 +40,7 @@ func PostCart(cartService cart.Carts) http.HandlerFunc {
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
-		w.Write(body)
+		_, _ = w.Write(body)
 	}
 }
 
@@ -66,7 +66,7 @@ func GetCart(cartService cart.Carts) http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Write(body)
+		_, _ = w.Write(body)
 	}
 }
 
@@ -106,7 +106,7 @@ func PutCart(cartService cart.Carts) http.HandlerFunc {
 
 		w.Header().Add("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write(body)
+		_, _ = w.Write(body)
 	}
 }
 
@@ -123,12 +123,13 @@ func PutProductCart(cartService cart.Carts) http.HandlerFunc {
 			return
 		}
 
-		productUpdate := cart.ProductUpdate{ProductID: productID, Quantity: productRequest.Quantity}
+		productRequest.ProductID = productID
 		if !productRequest.validate() {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
+		productUpdate := cart.ProductUpdate{ProductID: productRequest.ProductID, Quantity: productRequest.Quantity}
 		c, err := cartService.ModifyProduct(cartID, productUpdate)
 		if err != nil {
 			if errors.Is(err, cart.ErrCartNotFound) || errors.Is(err, cart.ErrProductNotFound) {

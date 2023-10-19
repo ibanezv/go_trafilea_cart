@@ -31,36 +31,14 @@ func NewServer(port int) CartApp {
 }
 
 func (app *CartApp) Run() error {
-	/* idleChan := make(chan struct{})
-
-	go func(app *CartApp, idleChan chan struct{}) {
-		signChan := make(chan os.Signal, 1)
-		signal.Notify(signChan, os.Interrupt, syscall.SIGTERM)
-		sig := <-signChan
-		log.Println("shutdown:", sig)
-		app.Stop(5 * time.Second)
-		// Actual shutdown trigger.
-		close(idleChan)
-	}(app, idleChan) */
-
 	return http.ListenAndServe(app.port, app.serveMux)
-	//return app.server.ListenAndServe()
 }
 
-/* func (app *CartApp) Stop(t time.Duration) {
-	ctx, cancel := context.WithTimeout(context.Background(), t)
-	defer cancel()
-	err := app.server.Shutdown(ctx)
-	if err != nil {
-		log.Fatalf("server Shutdown Failed:%+s", err)
-	}
-} */
-
 func (app *CartApp) routeMapper() {
-	app.serveMux.HandleFunc("/v1/cart/{cartId}", GetCart(app.cartService)).Methods(http.MethodGet)
-	app.serveMux.HandleFunc("/v1/cart", PostCart(app.cartService)).Methods(http.MethodPost)
-	app.serveMux.HandleFunc("/v1/cart/{cartId}/product/{productId}", PutProductCart(app.cartService)).Methods(http.MethodPut)
-	app.serveMux.HandleFunc("/v1/cart/{cartId}", PutCart(app.cartService)).Methods(http.MethodPut)
-	app.serveMux.HandleFunc("/v1/order", PostOrder(app.orderService)).Methods(http.MethodPost)
-	app.serveMux.HandleFunc("/v1/order/{cartId}", GetOrder(app.orderService)).Methods(http.MethodGet)
+	app.serveMux.HandleFunc("/api/v1/cart/{cartId}", GetCart(app.cartService)).Methods(http.MethodGet)
+	app.serveMux.HandleFunc("/api/v1/cart", PostCart(app.cartService)).Methods(http.MethodPost)
+	app.serveMux.HandleFunc("/api/v1/cart/{cartId}/product/{productId}", PutProductCart(app.cartService)).Methods(http.MethodPut)
+	app.serveMux.HandleFunc("/api/v1/cart/{cartId}", PutCart(app.cartService)).Methods(http.MethodPut)
+	app.serveMux.HandleFunc("/api/v1/order", PostOrder(app.orderService)).Methods(http.MethodPost)
+	app.serveMux.HandleFunc("/api/v1/order/{cartId}", GetOrder(app.orderService)).Methods(http.MethodGet)
 }
