@@ -15,6 +15,7 @@ type Repository interface {
 	OrderUpdate(order OrderDB) (OrderDB, error)
 	OrderGet(cartID string) (OrderDB, error)
 	ProductGet(ProductID string) (ProductDB, error)
+	FillProducts()
 }
 
 type InMemoryRepository struct {
@@ -77,10 +78,12 @@ func (r *InMemoryRepository) ProductGet(ProductID string) (ProductDB, error) {
 	return ProductDB{}, ErrRecordNotFound
 }
 
+func (r *InMemoryRepository) FillProducts() {
+	r.product["1"] = ProductDB{ProductID: "1", Name: "producto-1", Category: "Coffee", Price: 15.0}
+	r.product["2"] = ProductDB{ProductID: "2", Name: "producto-2", Category: "Equipment", Price: 22.0}
+	r.product["3"] = ProductDB{ProductID: "3", Name: "producto-3", Category: "Accessories", Price: 19.0}
+}
+
 func NewRepository() Repository {
-	productTable := make(map[string]ProductDB)
-	productTable["1"] = ProductDB{ProductID: "1", Name: "producto-1", Category: "Coffee", Price: 15.0}
-	productTable["2"] = ProductDB{ProductID: "2", Name: "producto-2", Category: "Equipment", Price: 22.0}
-	productTable["3"] = ProductDB{ProductID: "3", Name: "producto-3", Category: "Accessories", Price: 19.0}
-	return &InMemoryRepository{cart: make(map[string]CartDB), order: make(map[string]OrderDB), product: productTable, lock: sync.RWMutex{}}
+	return &InMemoryRepository{cart: make(map[string]CartDB), order: make(map[string]OrderDB), product: make(map[string]ProductDB), lock: sync.RWMutex{}}
 }

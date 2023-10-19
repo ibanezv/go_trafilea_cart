@@ -63,3 +63,7 @@ func (r *repositoryMock) OrderGet(cartID string) (repository.OrderDB, error) {
 func (r *repositoryMock) ProductGet(ProductID string) (repository.ProductDB, error) {
 	return repository.ProductDB{}, repository.ErrRecordNotFound
 }
+
+func (r *repositoryMock) FillProducts() {
+	panic("unimplemented")
+}

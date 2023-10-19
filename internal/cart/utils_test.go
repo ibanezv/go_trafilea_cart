@@ -51,3 +51,6 @@ func (r *repositoryMock) ProductGet(ProductID string) (repository.ProductDB, err
 	}
 	return repository.ProductDB{}, repository.ErrRecordNotFound
 }
+func (r *repositoryMock) FillProducts() {
+	panic("unimplemented")
+}

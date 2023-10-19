@@ -22,6 +22,7 @@ type CartApp struct {
 func NewServer(port int) CartApp {
 	router := *mux.NewRouter()
 	db := repository.NewRepository()
+	db.FillProducts()
 	cartService := cart.NewCartService(db)
 	orderService := order.NewOrdersService(db)
 	producService := product.NewProductsService(db)
