@@ -1,0 +1,95 @@
+{
+  "swagger": "2.0",
+  "info": {},
+  "paths": {
+    "/api/v1/cart": {
+      "post": {
+        "summary": "Create a new Cart .",
+        "operationId": "postCart",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "UserID",
+            "in": "query"
+          }
+        ]
+      }
+    },
+    "/api/v1/cart/{cartId}": {
+      "get": {
+        "description": "Get a cart by id of existing cart.",
+        "summary": "Get a cart by id.",
+        "operationId": "getCart",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "cart identity",
+            "name": "cartId",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/cart/{cartId}": {
+      "put": {
+        "description": "ccc.",
+        "summary": "Add ammount of product in cart",
+        "operationId": "ProductUpdate",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "cart identity",
+            "name": "cartId",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/cart/{cartId}/product/{productId}": {
+      "put": {
+        "description": "update products.",
+        "summary": "Update ammount of product in cart",
+        "operationId": "productsUpdateRequest",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "cart identity",
+            "name": "cartId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "product identity",
+            "name": "productId",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/order": {
+      "post": {
+        "description": "asdfsdf.",
+        "summary": "sdfsdfasdrfwe",
+        "operationId": "orderRequest",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "cart identity",
+            "name": "cartId",
+            "in": "path",
+            "required": true
+          }
+        ]
+      }
+    }
+  },
+  "responses": {
+    "CartResponse": {
+      "description": ""
+    }
+  }
+}

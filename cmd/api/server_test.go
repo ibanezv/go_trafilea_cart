@@ -16,7 +16,7 @@ const port = 80
 
 func TestCartCreationAndUpdate(t *testing.T) {
 	server := NewServer(port)
-	content, err := json.Marshal(cartRequest{
+	content, err := json.Marshal(CartRequest{
 		UserID: "123",
 	})
 	require.NoError(t, err)
@@ -29,7 +29,7 @@ func TestCartCreationAndUpdate(t *testing.T) {
 
 	// then
 	require.EqualValues(t, http.StatusCreated, recorder.Code)
-	cartResp := cartResponse{}
+	cartResp := CartResponse{}
 	err = json.Unmarshal(recorder.Body.Bytes(), &cartResp)
 	require.NoError(t, err)
 	assert.Equal(t, "123", cartResp.UseID)
@@ -44,7 +44,7 @@ func TestCartCreationAndUpdate(t *testing.T) {
 
 	// then
 	require.EqualValues(t, http.StatusOK, recorder.Code)
-	cartRespGet := cartResponse{}
+	cartRespGet := CartResponse{}
 	err = json.Unmarshal(recorder.Body.Bytes(), &cartRespGet)
 	require.NoError(t, err)
 	assert.Equal(t, cartResp.UseID, cartRespGet.UseID)

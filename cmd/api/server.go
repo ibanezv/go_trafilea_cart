@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -32,6 +33,7 @@ func NewServer(port int) CartApp {
 }
 
 func (app *CartApp) Run() error {
+	log.Println("transport", "HTTP", "addr", app.port)
 	return http.ListenAndServe(app.port, app.serveMux)
 }
 

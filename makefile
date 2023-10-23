@@ -3,7 +3,7 @@ PACKAGES = $(shell go list ./...)
 PACKAGES_PATH = $(shell go list -f '{{ .Dir }}' ./...)
 
 .PHONY: all
-all: check_tools ensure-deps fmt imports linter test
+all: check_tools ensure-deps fmt imports linter test swagger-create
 
 .PHONY: check_tools
 check_tools:
@@ -41,3 +41,10 @@ test-cover:
 	@echo "=> Running tests and generating report"
 	@go test ./... -covermode=atomic -coverprofile=/tmp/coverage.out -coverpkg=./... -count=1
 	@go tool cover -html=/tmp/coverage.out
+
+.PHONY: swagger-create
+swagger-create:
+	@echo "=> Scanning swagger models"
+	@swagger generate spec -o ./swagger.json --scan-models
+	@echo "=> Serve swagger document"
+	@swagger serve -F=swagger swagger.json

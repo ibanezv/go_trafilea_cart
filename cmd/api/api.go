@@ -1,10 +1,10 @@
 package api
 
-type cartRequest struct {
+type CartRequest struct {
 	UserID string
 }
 
-type cartResponse struct {
+type CartResponse struct {
 	CartID   string            `json:"cart_id"`
 	UseID    string            `json:"user_id"`
 	Products []ProductResponse `json:"products"`
@@ -47,6 +47,6 @@ func (r orderRequest) validate() bool {
 	return r.CartID != ""
 }
 
-func (r cartRequest) validate() bool {
+func (r CartRequest) validate() bool {
 	return r.UserID != ""
 }
